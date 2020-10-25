@@ -10,7 +10,11 @@ const app = express()
 const port = process.env.PORT || 5000
 
 //middlewares
-// app.use(bodyParser())
+//to convert data to json
+//1
+// app.use(bodyParser.json())
+//2
+app.use(express.json())
 
 //listen
 app.listen(port, () => console.log(`server is running on port ${port}`))
