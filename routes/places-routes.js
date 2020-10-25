@@ -1,6 +1,9 @@
 const express = require("express")
 const router = express.Router()
 
+const HttpError = require("../models/http-error")
+
+
 const DUMMY_PLACES = [
   {
     id: 'p1',
@@ -15,19 +18,27 @@ const DUMMY_PLACES = [
   }
 ];
 
-router.get("/user/:uid" , (req,res)=>{
-  const userId = req.params.uid 
-  const place = DUMMY_PLACES.find(place=>place.creator===userId)
-  res.json({place}) 
-})
-
-
-router.get("/:pid",(req,res)=>{
+//next() for asynconouns
+//throw error for secronouns
+router.get("/:pid",(req,res,next)=>{
   const placeId = req.params.pid
   //the req.params.:id is express functinality 
   const place = DUMMY_PLACES.find(place => place.id===placeId )
+  if(!place){
+    throw new HttpError("Could not find place for the provided id." , 404) 
+  }
   res.json({place})
 })
+
+router.get("/user/:uid" , (req,res,next)=>{
+  const userId = req.params.uid 
+  const place = DUMMY_PLACES.find(place=>place.creator===userId)
+  if(!place){
+    return next(new HttpError("Could not find place for the provided user id." , 404))
+  }
+  res.json({place}) 
+})
+
 
 
 

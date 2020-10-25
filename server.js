@@ -2,8 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 
-const placesRoutes = require('./routes/places')
-const usersRoutes = require('./routes/users')
+const placesRoutes = require('./routes/places-routes')
+const usersRoutes = require('./routes/users-routes')
 
 //express app
 const app = express()
@@ -23,5 +23,9 @@ app.use("/api/users",usersRoutes)
 //ERROR HANDLING MIDLLEWARE FUNCTION
 app.use((error,req,res,next)=>{
   //we check if a response has aleardy sent or not
-  if(res.headersSent) 
+  if(res.headersSent) {
+    return next(error)
+  }
+  res.status(error.code || 500)
+  res.json({message:error.message || "An unknown error occurred"})
 })
