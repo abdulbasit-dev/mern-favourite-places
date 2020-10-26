@@ -1,3 +1,4 @@
+const {validationResult} = require('express-validator')
 const {v4} = require('uuid')
 const HttpError = require('../models/http-error')
 
@@ -16,6 +17,10 @@ const getUsers = (req, res, next) => {
 
 const signup = (req, res, next) => {
   const {name, password, email} = req.body
+  const errpr = validationResult(req)
+  if (!errpr.isEmpty()) {
+    throw new HttpError('invalid input passsed, please check your data ')
+  }
 
   const hasUser = DUMMY_USERS.find(user => user.email === email)
 
@@ -38,10 +43,9 @@ const login = (req, res, next) => {
   const {email, password} = req.body
   const identifiedUser = DUMMY_USERS.find(user => user.email === email)
 
-  //
   if (!identifiedUser || identifiedUser.password !== password) {
     //401 authentication error
-    throw new HttpError('Could not find the user, credential seems to be wrong', 401)
+    throw new HttpError('Could not identify user, credential seems to be wrong', 401)
   }
 
   res.json({message: 'logged in'})

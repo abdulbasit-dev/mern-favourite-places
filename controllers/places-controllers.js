@@ -1,8 +1,9 @@
 const {v4} = require('uuid')
+const {validationResult} = require('express-validator')
 
 const HttpError = require('../models/http-error')
 
-const DUMMY_PLACES = [
+let DUMMY_PLACES = [
   {
     id: 'p1',
     title: 'Empire State Building',
@@ -13,17 +14,6 @@ const DUMMY_PLACES = [
     },
     address: '20 W 34th St, New York, NY 10001',
     creator: 'u1',
-  },
-  {
-    id: 'p2',
-    title: 'Empire State Building',
-    description: 'One of the most famous sky scrapers in the world!',
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: '20 W 34th St, New York, NY 10001',
-    creator: 'u2',
   },
   {
     id: 'p3',
@@ -61,7 +51,11 @@ const getPlacesByUserId = (req, res, next) => {
 
 const createPlace = (req, res, next) => {
   const {title, description, address, creator, coordinates} = req.body
-  console.log(req.body)
+  const error = validationResult(req)
+  if (!error.isEmpty()) {
+    throw new HttpError('invalid input passsed, please check your data')
+  }
+
   const createdPlace = {
     id: v4(),
     title,
@@ -77,12 +71,21 @@ const createPlace = (req, res, next) => {
 
 const deletePlace = (req, res, next) => {
   const placeId = req.params.pid
-  res.status(200).json({place: DUMMY_PLACES.filter(place => place.id !== placeId)})
+  if (!DUMMY_PLACES.find(place => place.id === placeId)) {
+    throw new HttpError('Could not find a place for that id', 404)
+  }
+  DUMMY_PLACES = DUMMY_PLACES.filter(place => place.id !== placeId)
+  res.status(200).json({message: 'Place Deleted'})
 }
 
 const updatePlace = (req, res, next) => {
   const placeId = req.params.pid
   const {title, description} = req.body
+  const error = validationResult(req)
+  if (!error.isEmpty()) {
+    throw new HttpError('invalid input passsed, please check your data')
+  }
+
   //find the current place and overwrite title and description
   const updatedPlace = {...DUMMY_PLACES.find(place => place.id === placeId), title, description}
   //find index of place that we wont to be updated
