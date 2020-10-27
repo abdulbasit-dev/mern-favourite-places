@@ -39,7 +39,7 @@ const getPlaceById = async (req, res, next) => {
   try {
     place = await Place.findById(placeId)
   } catch (err) {
-    return next(new HttpError('Somting went wrong, could not find place'))
+    return next(new HttpError('Somting went wrong, could not find place', 500))
   }
 
   if (!place) {
@@ -101,30 +101,57 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({place: createdPlace})
 }
 
-const deletePlace = (req, res, next) => {
+//Delete plaec
+const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid
-  if (!DUMMY_PLACES.find(place => place.id === placeId)) {
-    throw new HttpError('Could not find a place for that id', 404)
+
+  //1 finde place
+  let place
+  try {
+    place = await Place.findById(placeId)
+  } catch (err) {
+    return next(new HttpError('Somting went wrong, could not delete place', 500))
   }
-  DUMMY_PLACES = DUMMY_PLACES.filter(place => place.id !== placeId)
+
+  //2 then delete the place
+  try {
+    await place.remove()
+  } catch (err) {
+    return next(new HttpError('Somting went wrong, could not delete place', 500))
+  }
+
   res.status(200).json({message: 'Place Deleted'})
 }
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const placeId = req.params.pid
   const {title, description} = req.body
   const error = validationResult(req)
   if (!error.isEmpty()) {
-    throw new HttpError('invalid input passsed, please check your data')
+    return next(HttpError('invalid input passsed, please check your data', 421))
   }
 
-  //find the current place and overwrite title and description
-  const updatedPlace = {...DUMMY_PLACES.find(place => place.id === placeId), title, description}
-  //find index of place that we wont to be updated
-  const placeIndex = DUMMY_PLACES.findIndex(place => place.id === placeId)
-  //replace the old place with updatedPlace
-  DUMMY_PLACES[placeIndex] = updatedPlace
-  res.json({places: DUMMY_PLACES})
+  let place
+  try {
+    place = await Place.findById(placeId)
+  } catch (err) {
+    return next(new HttpError('Somting went wrong, could not update  place', 500))
+  }
+
+  if (!place) {
+    return next(new HttpError('Could not find place for the provided id.', 404))
+  }
+
+  place.title = title
+  place.description = description
+
+  try {
+    await place.save()
+  } catch (err) {
+    return next(new HttpError('Could not find place for the provided id.', 500))
+  }
+
+  res.json({place: place.toObject({getters: true})})
 }
 
 exports.getPlaceById = getPlaceById
