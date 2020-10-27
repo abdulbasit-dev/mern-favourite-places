@@ -67,6 +67,7 @@ const getPlacesByUserId = async (req, res, next) => {
   res.json({places: places.map(place => place.toObject({getters: true}))})
 }
 
+//Create place
 const createPlace = async (req, res, next) => {
   const {title, description, address, creator} = req.body
   const error = validationResult(req)
@@ -123,6 +124,7 @@ const deletePlace = async (req, res, next) => {
   res.status(200).json({message: 'Place Deleted'})
 }
 
+//Update place
 const updatePlace = async (req, res, next) => {
   const placeId = req.params.pid
   const {title, description} = req.body
