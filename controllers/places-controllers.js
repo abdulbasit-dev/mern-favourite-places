@@ -1,4 +1,4 @@
-const {v4} = require('uuid')
+geconst {v4} = require('uuid')
 const {validationResult} = require('express-validator')
 
 const HttpError = require('../models/http-error')
@@ -34,8 +34,7 @@ let DUMMY_PLACES = [
 //throw error for secronouns
 const getPlaceById = async (req, res, next) => {
   //the req.params.:id is express functinality
-  const placeId = req.params.pid
-  console.log(placeId)
+t   const placeId = req.params.pid
   let place
   try {
     place = await Place.findById(placeId)
@@ -50,13 +49,22 @@ const getPlaceById = async (req, res, next) => {
   res.json({place: place.toObject({getters: true})})
 }
 
+//findById return object
+//but find() retrun array of object
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid
-  const places = DUMMY_PLACES.filter(place => place.creator === userId)
+  let places
+  try {
+    places = await Place.find()
+    places = places.filter(place => place.creator === userId)
+  } catch (err) {
+    return next(new HttpError('Fetching places failed, please try again later'))
+  }
+
   if (!places || places.length === 0) {
     return next(new HttpError('Could not find places for the provided user id.', 404))
   }
-  res.json({places})
+  res.json({places: places.map(place => place.toObject({getters: true}))})
 }
 
 const createPlace = async (req, res, next) => {
