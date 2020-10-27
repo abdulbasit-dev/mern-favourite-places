@@ -1,4 +1,4 @@
-geconst {v4} = require('uuid')
+const {v4} = require('uuid')
 const {validationResult} = require('express-validator')
 
 const HttpError = require('../models/http-error')
@@ -34,7 +34,7 @@ let DUMMY_PLACES = [
 //throw error for secronouns
 const getPlaceById = async (req, res, next) => {
   //the req.params.:id is express functinality
-t   const placeId = req.params.pid
+  const placeId = req.params.pid
   let place
   try {
     place = await Place.findById(placeId)
