@@ -1,6 +1,7 @@
 const {validationResult} = require('express-validator')
 const {v4} = require('uuid')
 const HttpError = require('../models/http-error')
+const User = require('../models/User')
 
 const DUMMY_USERS = [
   {
@@ -15,6 +16,7 @@ const getUsers = (req, res, next) => {
   res.json({users: DUMMY_USERS})
 }
 
+//create user
 const signup = (req, res, next) => {
   const {name, password, email} = req.body
   const errpr = validationResult(req)
