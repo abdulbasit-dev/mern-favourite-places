@@ -16,28 +16,32 @@ const getUsers = (req, res, next) => {
   res.json({users: DUMMY_USERS})
 }
 
-//create user
-const signup = (req, res, next) => {
+//Create user
+const signup = async (req, res, next) => {
   const {name, password, email} = req.body
   const errpr = validationResult(req)
   if (!errpr.isEmpty()) {
-    throw new HttpError('invalid input passsed, please check your data ')
+    return next(new HttpError('invalid input passsed, please check your data ', 422))
   }
 
-  const hasUser = DUMMY_USERS.find(user => user.email === email)
+  // const hasUser = DUMMY_USERS.find(user => user.email === email)
+  // if (hasUser) {
+  //   //422 user input error
+  //   throw new HttpError('Could not create user, email already exist', 422)
+  // }
 
-  if (hasUser) {
-    //422 user input error
-    throw new HttpError('Could not create user, email already exist', 422)
-  }
-
-  const createdUser = {
-    id: v4(),
+  let createdUser = new User({
     name,
-    email,
     password,
+    email,
+  })
+
+  try {
+    await createdUser.save()
+  } catch (err) {
+    return next(new HttpError('sds', 500))
   }
-  DUMMY_USERS.unshift(createdUser)
+
   res.status(201).json({user: createdUser})
 }
 

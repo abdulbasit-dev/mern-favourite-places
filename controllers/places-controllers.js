@@ -5,31 +5,6 @@ const HttpError = require('../models/http-error')
 const getCoordsForAddress = require('../util/location')
 const Place = require('../models/place')
 
-let DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Empire State Building',
-    description: 'One of the most famous sky scrapers in the world!',
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: '20 W 34th St, New York, NY 10001',
-    creator: 'u1',
-  },
-  {
-    id: 'p3',
-    title: 'shandar cave',
-    description: 'One of the most famous cave',
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: '20 W 34th St, New York, NY 10001',
-    creator: 'u1',
-  },
-]
-
 //next() for asynconouns
 //throw error for secronouns
 const getPlaceById = async (req, res, next) => {
@@ -55,8 +30,7 @@ const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid
   let places
   try {
-    places = await Place.find()
-    places = places.filter(place => place.creator === userId)
+    places = await Place.find({creator: userId})
   } catch (err) {
     return next(new HttpError('Fetching places failed, please try again later'))
   }
