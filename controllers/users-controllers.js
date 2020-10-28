@@ -18,7 +18,7 @@ const getUsers = async (req, res, next) => {
 
 //Create user
 const signup = async (req, res, next) => {
-  const {name, password, email, places} = req.body
+  const {name, password, email} = req.body
   const errpr = validationResult(req)
   if (!errpr.isEmpty()) {
     return next(new HttpError('invalid input passsed, please check your data ', 422))
@@ -41,7 +41,7 @@ const signup = async (req, res, next) => {
     password,
     email,
     image: 'https://live.staticflickr.com/7631/26849088292_36fc52ee90_b.jpg',
-    places,
+    places: [],
   })
 
   try {
