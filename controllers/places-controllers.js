@@ -33,7 +33,10 @@ const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid
   let places
   try {
-    places = await Place.find({creator: userId})
+    //one way
+    // places = await Place.find({creator: userId})
+    // onther way
+    places = await User.findById(userId).populate('places')
   } catch (err) {
     return next(new HttpError('Fetching places failed, please try again later'))
   }
@@ -41,7 +44,7 @@ const getPlacesByUserId = async (req, res, next) => {
   if (!places || places.length === 0) {
     return next(new HttpError('Could not find places for the provided user id.', 404))
   }
-  res.json({places: places.map(place => place.toObject({getters: true}))})
+  res.json({places: places.places.map(place => place.toObject({getters: true}))})
 }
 
 //Create place
@@ -96,26 +99,44 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({place: createdPlace})
 }
 
-//Delete plaec
+//Delete place
 const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid
 
-  //1 finde place
+  //1 find the  place
   let place
   try {
-    place = await Place.findById(placeId)
+    place = await Place.findById(placeId).populate('creator')
   } catch (err) {
     return next(new HttpError('Somting went wrong, could not delete place', 500))
   }
 
-  //2 then delete the place
+  //if we dont have a place with id
+  if (!place) {
+    return next(new HttpError('Could not find a place for this id ', 404))
+  }
+
+  // 2 then delete the place
   try {
-    await place.remove()
+    // const sess = mongoose.startSession()
+    // sess.startTransaction()
+    // //first remove the place in the place collection
+    // await place.remove({session: sess})
+    // //then also remove this place in user docuement
+    // place.creator.places.pull(place)
+    // await place.creator.save({session: sess})
+    // await sess.commitTransaction()
+    const sess = await mongoose.startSession()
+    sess.startTransaction()
+    await place.remove({session: sess})
+    place.creator.places.pull(place)
+    await place.creator.save({session: sess})
+    await sess.commitTransaction()
   } catch (err) {
     return next(new HttpError('Somting went wrong, could not delete place', 500))
   }
 
-  res.status(200).json({message: 'Place Deleted'})
+  res.status(200).json({message: 'Place Deleted', place})
 }
 
 //Update place
