@@ -118,17 +118,11 @@ const deletePlace = async (req, res, next) => {
 
   // 2 then delete the place
   try {
-    // const sess = mongoose.startSession()
-    // sess.startTransaction()
-    // //first remove the place in the place collection
-    // await place.remove({session: sess})
-    // //then also remove this place in user docuement
-    // place.creator.places.pull(place)
-    // await place.creator.save({session: sess})
-    // await sess.commitTransaction()
-    const sess = await mongoose.startSession()
+    const sess = mongoose.startSession()
     sess.startTransaction()
+    //first remove the place in the place collection
     await place.remove({session: sess})
+    //then also remove this place in user docuement
     place.creator.places.pull(place)
     await place.creator.save({session: sess})
     await sess.commitTransaction()
