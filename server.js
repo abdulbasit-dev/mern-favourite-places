@@ -19,8 +19,7 @@ const port = process.env.PORT || 5000
 app.use(express.json())
 
 //connect to mongoDb
-const DB_URL =
-  'mongodb+srv://abdulbasit:42591800@cluster0.clcfv.mongodb.net/favoratePlaces?retryWrites=true&w=majority'
+const DB_URL = process.env.DATABASE_URI
 mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}, () => {
   console.log('connected')
 })
