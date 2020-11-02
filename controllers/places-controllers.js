@@ -106,6 +106,7 @@ const deletePlace = async (req, res, next) => {
   //1 find the  place
   let place
   try {
+    //populate get document from other collection but first they must have relation
     place = await Place.findById(placeId).populate('creator')
   } catch (err) {
     return next(new HttpError('Somting went wrong, could not delete place', 500))

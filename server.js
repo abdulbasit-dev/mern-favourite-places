@@ -20,7 +20,7 @@ app.use(express.json())
 
 //connect to mongoDb
 const DB_URL =
-  'mongodb+srv://abdulbasit:42591800@cluster0.clcfv.mongodb.net/favoratePlace?retryWrites=true&w=majority'
+  'mongodb+srv://abdulbasit:42591800@cluster0.clcfv.mongodb.net/favoratePlaces?retryWrites=true&w=majority'
 mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}, () => {
   console.log('connected')
 })
@@ -29,6 +29,18 @@ mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}, () =
 app.listen(port, () => console.log(`server is running on port ${port}`))
 
 //Routes
+//CORS hnadler
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  )
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE')
+
+  next()
+})
+
 app.use('/api/places', placesRoutes)
 app.use('/api/users', usersRoutes)
 

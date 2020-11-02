@@ -19,8 +19,8 @@ const getUsers = async (req, res, next) => {
 //Create user
 const signup = async (req, res, next) => {
   const {name, password, email} = req.body
-  const errpr = validationResult(req)
-  if (!errpr.isEmpty()) {
+  const error = validationResult(req)
+  if (!error.isEmpty()) {
     return next(new HttpError('invalid input passsed, please check your data ', 422))
   }
 
@@ -53,6 +53,7 @@ const signup = async (req, res, next) => {
   res.status(201).json({user: createdUser.toObject({getters: true})})
 }
 
+//Login
 const login = async (req, res, next) => {
   const {email, password} = req.body
 
@@ -61,14 +62,14 @@ const login = async (req, res, next) => {
     //finde one dec based on the condition
     existingUser = await User.findOne({email: email})
   } catch (err) {
-    return next(new HttpError('Signing ip failed, please try again later', 500))
+    return next(new HttpError('Signing in failed, please try again later', 500))
   }
 
   if (!existingUser || existingUser.password !== password) {
     return next(new HttpError('invalid email or password, please try again ', 401))
   }
 
-  res.json({message: 'logged in', user: existingUser})
+  res.json({message: 'logged in', user: existingUser.toObject({getters: true})})
 }
 
 exports.getUsers = getUsers
