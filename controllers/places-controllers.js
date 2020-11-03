@@ -118,7 +118,6 @@ const deletePlace = async (req, res, next) => {
   }
 
   const imagePath = place.image
-  console.log(imagePath)
 
   // 2 then delete the place
   try {
