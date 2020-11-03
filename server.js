@@ -2,6 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 const mongoose = require('mongoose')
+const fs = require('fs')
+const path = require('path')
 
 const placesRoutes = require('./routes/places-routes')
 const usersRoutes = require('./routes/users-routes')
@@ -14,9 +16,9 @@ const port = process.env.PORT || 5000
 //middlewares
 //to convert data to json
 //1
-// app.use(bodyParser.json())
+app.use(bodyParser.json())
 //2
-app.use(express.json())
+// app.use(express.json())
 
 //connect to mongoDb
 const DB_URL = process.env.DATABASE_URI
@@ -28,6 +30,7 @@ mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}, () =
 app.listen(port, () => console.log(`server is running on port ${port}`))
 
 //Routes
+
 //CORS hnadler
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -39,6 +42,9 @@ app.use((req, res, next) => {
 
   next()
 })
+
+//this middleware make /uploads/images (images) accessabel from outside
+app.use('/uploads/images', express.static(path.join('uploads', 'images')))
 
 app.use('/api/places', placesRoutes)
 app.use('/api/users', usersRoutes)
@@ -52,6 +58,11 @@ app.use((req, res, next) => {
 //if we have any error in above middlware the below middleware function run
 //ERROR HANDLING MIDLLEWARE FUNCTION
 app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, err => {
+      console.log(err)
+    })
+  }
   //we check if a response has aleardy sent or not
   if (res.headersSent) {
     return next(error)
