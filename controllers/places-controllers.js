@@ -50,7 +50,7 @@ const getPlacesByUserId = async (req, res, next) => {
 
 //Create place
 const createPlace = async (req, res, next) => {
-  const {title, description, address, creator} = req.body
+  const {title, description, address} = req.body
   const error = validationResult(req)
   if (!error.isEmpty()) {
     return next(new HttpError('invalid input passsed, please check your data'))
@@ -69,13 +69,13 @@ const createPlace = async (req, res, next) => {
     address,
     location: coordinates,
     image: req.file.path,
-    creator,
+    creator: req.userData.userId,
   })
 
   //first check if we have the user id in the database
   let user
   try {
-    user = await User.findById(creator)
+    user = await User.findById(req.userData.userId)
   } catch (err) {
     return next(new HttpError('Creating place failed, please try agian, not finde user  ', 500))
   }
@@ -117,6 +117,9 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError('Could not find a place for this id ', 404))
   }
 
+  if (place.creator.id !== req.userData.userId) {
+    return next(new HttpError('you are not allow to delete this place', 401))
+  }
   const imagePath = place.image
 
   // 2 then delete the place
@@ -157,6 +160,11 @@ const updatePlace = async (req, res, next) => {
 
   if (!place) {
     return next(new HttpError('Could not find place for the provided id.', 404))
+  }
+
+  //autherzation check (401 not authrizaed user)
+  if (place.creator.toString() !== req.userData.userId) {
+    return next(new HttpError('You are not allow to edit this place', 401))
   }
 
   place.title = title

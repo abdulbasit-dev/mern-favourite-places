@@ -1,5 +1,7 @@
 const {validationResult} = require('express-validator')
-const {v4} = require('uuid')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+
 const HttpError = require('../models/http-error')
 const User = require('../models/User')
 
@@ -29,16 +31,23 @@ const signup = async (req, res, next) => {
     //finde one dec based on the condition
     existingUser = await User.findOne({email: email})
   } catch (err) {
-    return next(new HttpError('Signing ip failed, please try again later', 500))
+    return next(new HttpError('Signing up failed, please try again later', 500))
   }
 
   if (existingUser) {
     return next(new HttpError('User already exist, please login insted', 422))
   }
 
-  let createdUser = new User({
+  let hashedPassowrd
+  try {
+    hashedPassowrd = await bcrypt.hash(password, 12)
+  } catch (err) {
+    return next(new HttpError('Could not create user, please try again', 500))
+  }
+
+  const createdUser = new User({
     name,
-    password,
+    password: hashedPassowrd,
     email,
     image: req.file.path,
     places: [],
@@ -50,7 +59,17 @@ const signup = async (req, res, next) => {
     return next(new HttpError('Signing up failed, Please try again', 500))
   }
 
-  res.status(201).json({user: createdUser.toObject({getters: true})})
+  //generate token with jwt
+  let token
+  try {
+    token = jwt.sign({userId: createdUser.id, email: createdUser.email}, "don't_share_this_word", {
+      expiresIn: '1h',
+    })
+  } catch (err) {
+    return next(new HttpError('Signing up failed, please try again later', 500))
+  }
+
+  res.status(201).json({userId: createdUser.id, email: createdUser.email, token})
 }
 
 //Login
@@ -65,11 +84,45 @@ const login = async (req, res, next) => {
     return next(new HttpError('Signing in failed, please try again later', 500))
   }
 
-  if (!existingUser || existingUser.password !== password) {
+  //403 not authentecate
+  if (!existingUser) {
+    return next(new HttpError('invalid email or password, please try again ', 403))
+  }
+
+  //check for password
+  let isValidPassword = false
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password)
+  } catch (err) {
+    return next(
+      new HttpError('could not log you in, invalid password or email please try again'),
+      500
+    )
+  }
+
+  if (!isValidPassword) {
     return next(new HttpError('invalid email or password, please try again ', 401))
   }
 
-  res.json({message: 'logged in', user: existingUser.toObject({getters: true})})
+  //generate token with jwt
+  let token
+  try {
+    token = jwt.sign(
+      {userId: existingUser.id, email: existingUser.email},
+      "don't_share_this_word",
+      {
+        expiresIn: '1h',
+      }
+    )
+  } catch (err) {
+    return next(new HttpError('loffing in ip failed, please try again later', 500))
+  }
+
+  res.json({
+    userId: existingUser.id,
+    email: existingUser.email,
+    token,
+  })
 }
 
 exports.getUsers = getUsers
