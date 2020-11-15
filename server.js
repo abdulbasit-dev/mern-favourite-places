@@ -21,7 +21,7 @@ app.use(bodyParser.json())
 // app.use(express.json())
 
 //connect to mongoDb
-const DB_URL = process.env.DATABASE_URI
+const DB_URL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.clcfv.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
 mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}, () => {
   console.log('connected')
 })

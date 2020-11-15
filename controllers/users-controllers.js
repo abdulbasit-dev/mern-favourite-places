@@ -62,7 +62,7 @@ const signup = async (req, res, next) => {
   //generate token with jwt
   let token
   try {
-    token = jwt.sign({userId: createdUser.id, email: createdUser.email}, "don't_share_this_word", {
+    token = jwt.sign({userId: createdUser.id, email: createdUser.email}, process.env.JWT_KEY, {
       expiresIn: '1h',
     })
   } catch (err) {
@@ -107,13 +107,9 @@ const login = async (req, res, next) => {
   //generate token with jwt
   let token
   try {
-    token = jwt.sign(
-      {userId: existingUser.id, email: existingUser.email},
-      "don't_share_this_word",
-      {
-        expiresIn: '1h',
-      }
-    )
+    token = jwt.sign({userId: existingUser.id, email: existingUser.email}, process.env.JWT_KEY, {
+      expiresIn: '1h',
+    })
   } catch (err) {
     return next(new HttpError('loffing in ip failed, please try again later', 500))
   }
