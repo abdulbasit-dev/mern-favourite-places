@@ -46,8 +46,8 @@ app.use((req, res, next) => {
 //this middleware make /uploads/images (images) accessabel from outside
 app.use('/uploads/images', express.static(path.join('uploads', 'images')))
 
-app.use('/api/places', placesRoutes)
 app.use('/api/users', usersRoutes)
+app.use('/api/places', placesRoutes)
 
 //unspportes route handling like (http://localhost:5000/api/u2)
 app.use((req, res, next) => {
