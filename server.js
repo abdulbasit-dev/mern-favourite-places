@@ -4,6 +4,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const fs = require('fs')
 const path = require('path')
+const colors = require("colors")
 
 const placesRoutes = require('./routes/places-routes')
 const usersRoutes = require('./routes/users-routes')
@@ -21,15 +22,14 @@ app.use(bodyParser.json())
 // app.use(express.json())
 
 //connect to mongoDb
-const DB_URL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.clcfv.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
-mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}, () => {
-  console.log('connected')
+mongoose.connect(process.env.MONGO_URI)
+mongoose.connection.once('open',()=>{
+  //listen
+  app.listen(port, () => console.log(`server is running on port ${port}`.red))
 })
-
-//listen
-app.listen(port, () => console.log(`server is running on port ${port}`))
-
-//Routes
+mongoose.connection.on("error",(err)=>{
+  console.log(err);
+})
 
 //CORS hnadler
 app.use((req, res, next) => {
