@@ -1,5 +1,5 @@
 const express = require('express')
-const bodyParser = require('body-parser')
+const morgan = require('morgan')
 require('dotenv').config()
 const mongoose = require('mongoose')
 const fs = require('fs')
@@ -13,13 +13,12 @@ const HttpError = require('./models/http-error')
 //express app
 const app = express()
 const port = process.env.PORT || 5000
+app.use(express.static(path.resolve(__dirname, './client/build')));
 
 //middlewares
 //to convert data to json
-//1
-app.use(bodyParser.json())
-//2
-// app.use(express.json())
+app.use(express.json())
+app.use(morgan("dev"))
 
 //connect to mongoDb
 mongoose.connect(process.env.MONGO_URI)
