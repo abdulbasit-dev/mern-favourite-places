@@ -16,7 +16,7 @@ function UserPlaces() {
     const getPlaces = async () => {
       try {
         const responseData = await sendRequest(
-          `/places/user/${uid}`
+          `api/places/user/${uid}`
         );
         setUserPlaces(responseData.places);
       } catch (err) { }
